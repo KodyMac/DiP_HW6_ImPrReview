@@ -119,3 +119,72 @@ def main():
         print("Error: Could not load image")
         return
     print(f"Image shape: {im.shape}") #print starting dimensions
+
+    print("\n1. Apply translation (tx=300, ty=200)")
+    translated = Translate(im, 300,200)
+    cv2.imwrite('output_translated.jpg', translated)
+    print(" Saved output")
+
+    print("\n2. Apply crop and scale (x1=1, y1=1600, x2=600, y2=1200, s=0.5)")
+    cropped_scaled = CropScale(im, 1, 1600, 600, 1200, 0.5)
+    cv2.imwrite('output_cropscale.jpg', cropped_scaled)
+    print(" Saved output")
+
+    print("\n3. Apply vertical flip")
+    v_flip = Vertical_Flip(im)
+    cv2.imwrite('output_vflip.jpg', v_flip)
+    print(" Saved output")
+
+    print("\n4. Apply horizontal flip")
+    h_flip = Horizontal_Flip(im)
+    cv2.imwrite('output_hflip.jpg', h_flip)
+    print(" Saved output")
+
+    print("\n5. Apply rotation (angle = 60)")
+    rotated = Rotate(im, 60)
+    cv2.imwrite('output_rotated.jpg', rotated)
+    print(" Saved output")
+
+    print("\n6. Apply fill (x1=500, y1=1000, x2=1000, y2=800, val=150)")
+    filled = Fill(im, 500, 1000, 1000, 800, 150)
+    cv2.imwrite('output_filled.jpg', filled)
+    print(" Saved output")
+
+
+    print("\nExtracting green channel")
+    green_chan = im[:,:,1]
+
+    print("\nComputing gradient at small scale")
+    Ix_s, Iy_s, M_s, theta_s, H_s = gradients(green_chan, sigma=1)
+
+    cv2.imwrite('output_Ix_small.jpg', cv2.normalize(Ix_s, None, 0, 255, cv2.NORM_MINMAX).astype(np.uint8))
+    cv2.imwrite('output_Iy_small.jpg', cv2.normalize(Iy_s, None, 0, 255, cv2.NORM_MINMAX).astype(np.uint8))
+    cv2.imwrite('output_M_small.jpg', cv2.normalize(M_s, None, 0, 255, cv2.NORM_MINMAX).astype(np.uint8))
+
+    #visualize small scale results in one thing
+    fig_small = show_gradients(Ix_s, Iy_s, M_s, theta_s, H_s, "Small Scale (theta=1.0)")
+
+    #save figure
+    fig_small.savefig('output_gradients_small_scale.png', dpi=150, bbox_inches='tight')
+    print(" Saved output")
+
+    #large scale
+    print("\nComputing gradients at large scale (sigma=3.0)")
+    Ix_l, Iy_l, M_l, theta_l, H_l = gradients(green_chan, sigma=3.0)
+
+    #save images
+    cv2.imwrite('output_Ix_large.jpg', cv2.normalize(Ix_l, None, 0, 255, cv2.NORM_MINMAX).astype(np.uint8))
+    cv2.imwrite('output_Iy_large.jpg', cv2.normalize(Iy_l, None, 0, 255, cv2.NORM_MINMAX).astype(np.uint8))
+    cv2.imwrite('output_M_large.jpg', cv2.normalize(M_l, None, 0, 255, cv2.NORM_MINMAX).astype(np.uint8))
+
+    #visualize
+    fig_large = show_gradients(Ix_l, Iy_l, M_l, theta_l, H_l, "Large Scale (theta=3.0)")
+    fig_large.savefig('output_gradients_large_scale.png', dpi=150, bbox_inches='tight')
+    print(" Saved output")
+
+    print("Completed! All output files are saved")
+
+    plt.show() #show matplotlib figures
+
+if __name__ == "__main__":
+    main()
